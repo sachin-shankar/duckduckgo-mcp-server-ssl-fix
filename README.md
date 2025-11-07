@@ -1,12 +1,6 @@
-# DuckDuckGo Search MCP Server
+# DuckDuckGo Search MCP Server (SSL-Fix Edition)
 
-[![smithery badge](https://smithery.ai/badge/@nickclyde/duckduckgo-mcp-server)](https://smithery.ai/server/@nickclyde/duckduckgo-mcp-server)
-
-A Model Context Protocol (MCP) server that provides web search capabilities through DuckDuckGo, with additional features for content fetching and parsing.
-
-<a href="https://glama.ai/mcp/servers/phcus2gcpn">
-  <img width="380" height="200" src="https://glama.ai/mcp/servers/phcus2gcpn/badge" alt="DuckDuckGo Server MCP server" />
-</a>
+A Model Context Protocol (MCP) server that provides web search capabilities through DuckDuckGo, with additional features for content fetching and parsing. **This fork includes configurable SSL verification for corporate proxy environments.**
 
 ## Features
 
@@ -15,26 +9,86 @@ A Model Context Protocol (MCP) server that provides web search capabilities thro
 - **Rate Limiting**: Built-in protection against rate limits for both search and content fetching
 - **Error Handling**: Comprehensive error handling and logging
 - **LLM-Friendly Output**: Results formatted specifically for large language model consumption
+- **🆕 Configurable SSL Verification**: Works in corporate environments with SSL inspection/proxies
 
 ## Installation
-
-### Installing via Smithery
-
-To install DuckDuckGo Search Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@nickclyde/duckduckgo-mcp-server):
-
-```bash
-npx -y @smithery/cli install @nickclyde/duckduckgo-mcp-server --client claude
-```
 
 ### Installing via `uv`
 
 Install directly from PyPI using `uv`:
 
 ```bash
-uv pip install duckduckgo-mcp-server
+uv pip install duckduckgo-mcp-server-ssl-fix
 ```
 
+### Installing via `pip`
+
+```bash
+pip install duckduckgo-mcp-server-ssl-fix
+```
+
+## Configuration
+
+### SSL Verification Settings
+
+This package supports configurable SSL verification through environment variables:
+
+#### Option 1: Disable SSL Verification (for corporate proxies)
+
+```bash
+export DDG_DISABLE_SSL_VERIFY=true
+```
+
+⚠️ **Security Note**: Only disable SSL verification in trusted corporate environments with SSL inspection.
+
+#### Option 2: Use Custom Certificate
+
+```bash
+export DDG_SSL_CERT_PATH=/path/to/your/corporate/cert.pem
+```
+
+#### Option 3: Default (Secure)
+
+If neither environment variable is set, standard SSL verification is used.
+
 ## Usage
+
+### Running with Claude Code
+
+Add to your Claude Code MCP configuration:
+
+**macOS/Linux**: `~/.config/claude/claude_desktop_config.json`
+**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+    "mcpServers": {
+        "ddg-search": {
+            "command": "uvx",
+            "args": ["duckduckgo-mcp-server-ssl-fix"],
+            "env": {
+                "DDG_DISABLE_SSL_VERIFY": "true"
+            }
+        }
+    }
+}
+```
+
+**For Claude Code CLI configuration**, create/edit `~/.config/claude-code/settings.json`:
+
+```json
+{
+    "mcpServers": {
+        "duckduckgo": {
+            "command": "uvx",
+            "args": ["duckduckgo-mcp-server-ssl-fix"],
+            "env": {
+                "DDG_DISABLE_SSL_VERIFY": "true"
+            }
+        }
+    }
+}
+```
 
 ### Running with Claude Desktop
 
@@ -50,7 +104,10 @@ Add the following configuration:
     "mcpServers": {
         "ddg-search": {
             "command": "uvx",
-            "args": ["duckduckgo-mcp-server"]
+            "args": ["duckduckgo-mcp-server-ssl-fix"],
+            "env": {
+                "DDG_DISABLE_SSL_VERIFY": "true"
+            }
         }
     }
 }
@@ -58,17 +115,21 @@ Add the following configuration:
 
 3. Restart Claude Desktop
 
-### Development
+### Testing the Package
 
-For local development, you can use the MCP CLI:
+You can test the package directly:
 
 ```bash
-# Run with the MCP Inspector
-mcp dev server.py
+# Test with SSL verification disabled
+DDG_DISABLE_SSL_VERIFY=true uvx duckduckgo-mcp-server-ssl-fix
 
-# Install locally for testing with Claude Desktop
-mcp install server.py
+# Test with custom certificate
+DDG_SSL_CERT_PATH=/path/to/cert.pem uvx duckduckgo-mcp-server-ssl-fix
+
+# Test with default SSL verification
+uvx duckduckgo-mcp-server-ssl-fix
 ```
+
 ## Available Tools
 
 ### 1. Search Tool
@@ -121,6 +182,49 @@ Cleaned and formatted text content from the webpage.
 - Detailed logging through MCP context
 - Graceful degradation on rate limits or timeouts
 
+### SSL Configuration
+
+Three modes of operation:
+
+1. **Secure (Default)**: Full SSL verification using system certificates
+2. **Custom Certificate**: Specify your organization's root certificate
+3. **Disabled Verification**: For corporate proxies with SSL inspection (less secure)
+
+## Troubleshooting
+
+### SSL Certificate Errors
+
+If you see errors like:
+```
+[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed
+```
+
+This typically means you're behind a corporate proxy with SSL inspection. Solutions:
+
+1. **Disable SSL Verification** (quick fix):
+   ```bash
+   export DDG_DISABLE_SSL_VERIFY=true
+   ```
+
+2. **Use Corporate Certificate** (more secure):
+   ```bash
+   export DDG_SSL_CERT_PATH=/path/to/corporate/cert.pem
+   ```
+
+3. **Export Certificate from Browser**:
+   - Open your browser's certificate manager
+   - Find your organization's root certificate
+   - Export as PEM format
+   - Use the path with `DDG_SSL_CERT_PATH`
+
+## Differences from Original
+
+This fork adds:
+- Configurable SSL verification via environment variables
+- Support for custom SSL certificates
+- Corporate proxy-friendly defaults
+- Enhanced documentation for SSL issues
+
 ## Contributing
 
 Issues and pull requests are welcome! Some areas for potential improvement:
@@ -133,3 +237,7 @@ Issues and pull requests are welcome! Some areas for potential improvement:
 ## License
 
 This project is licensed under the MIT License.
+
+## Credits
+
+Based on the original [duckduckgo-mcp-server](https://github.com/nickclyde/duckduckgo-mcp-server) by Nick Clyde.

@@ -10,6 +10,25 @@ import asyncio
 from datetime import datetime, timedelta
 import time
 import re
+import warnings
+import os
+
+# Configuration: SSL verification can be disabled via environment variable
+# Set DDG_DISABLE_SSL_VERIFY=true to disable SSL verification (useful for corporate proxies)
+DISABLE_SSL_VERIFY = os.getenv("DDG_DISABLE_SSL_VERIFY", "false").lower() in ("true", "1", "yes")
+
+# SSL certificate path can be specified via environment variable
+# Set DDG_SSL_CERT_PATH=/path/to/cert.pem to use a custom certificate
+SSL_CERT_PATH = os.getenv("DDG_SSL_CERT_PATH", None)
+
+# Determine SSL verification setting
+if DISABLE_SSL_VERIFY:
+    SSL_VERIFY: bool | str = False
+    warnings.filterwarnings("ignore", message="Unverified HTTPS request")
+elif SSL_CERT_PATH:
+    SSL_VERIFY = SSL_CERT_PATH
+else:
+    SSL_VERIFY = True
 
 
 @dataclass
@@ -82,7 +101,7 @@ class DuckDuckGoSearcher:
 
             await ctx.info(f"Searching DuckDuckGo for: {query}")
 
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(verify=SSL_VERIFY) as client:
                 response = await client.post(
                     self.BASE_URL, data=data, headers=self.HEADERS, timeout=30.0
                 )
@@ -156,7 +175,7 @@ class WebContentFetcher:
 
             await ctx.info(f"Fetching content from: {url}")
 
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(verify=SSL_VERIFY) as client:
                 response = await client.get(
                     url,
                     headers={

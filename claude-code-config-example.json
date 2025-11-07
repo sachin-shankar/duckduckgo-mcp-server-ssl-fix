@@ -1,0 +1,30 @@
+{
+  "mcpServers": {
+    "duckduckgo": {
+      "command": "uvx",
+      "args": ["duckduckgo-mcp-server-ssl-fix"],
+      "env": {
+        "DDG_DISABLE_SSL_VERIFY": "true"
+      },
+      "disabled": false
+    }
+  },
+  "_comment": "This configuration enables the DuckDuckGo MCP server with SSL verification disabled for corporate proxies",
+  "_instructions": [
+    "Copy this configuration to one of these locations:",
+    "  - Global: ~/.config/claude-code/settings.json",
+    "  - Project: .claude/settings.json (in your project root)",
+    "",
+    "SSL Configuration Options:",
+    "  1. Disable SSL verification (for corporate proxies):",
+    "     \"DDG_DISABLE_SSL_VERIFY\": \"true\"",
+    "",
+    "  2. Use custom certificate:",
+    "     \"DDG_SSL_CERT_PATH\": \"/path/to/cert.pem\"",
+    "",
+    "  3. Default SSL verification (remove env section):",
+    "     Remove or comment out the entire 'env' object",
+    "",
+    "After updating configuration, restart Claude Code or reload MCP servers"
+  ]
+}

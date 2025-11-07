@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__duckduckgo__search",
+      "Bash(python3:*)",
+      "Bash(tree:*)",
+      "Bash(uv:*)",
+      "Bash(chmod:*)",
+      "Bash(DDG_DISABLE_SSL_VERIFY=true uv run python:*)",
+      "Bash(DDG_DISABLE_SSL_VERIFY=true uv run --with ./dist/duckduckgo_mcp_server_ssl_fix-0.2.0-py3-none-any.whl python:*)",
+      "Bash(gh repo fork:*)",
+      "Bash(git checkout:*)",
+      "Bash(gh repo view:*)",
+      "Bash(git remote add:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
